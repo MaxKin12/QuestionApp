@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class OptionMapper {
+public class OptionsMapper {
     public List<OptionsDto> toOptionsDto(List<Options> optionsList) {
         List<OptionsDto> optionsDtoList = new ArrayList<>();
         for (Options options : optionsList) {
