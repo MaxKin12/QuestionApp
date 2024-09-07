@@ -2,7 +2,9 @@ package com.project.QuestionApp.mapper;
 
 import com.project.QuestionApp.dto.UserDto;
 import com.project.QuestionApp.entity.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapper {
     public User toUser (UserDto userDto) {
         User user = new User();
