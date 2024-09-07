@@ -5,11 +5,13 @@ import com.project.QuestionApp.dto.ChangePasswordDto;
 import com.project.QuestionApp.dto.EditInfoDto;
 import com.project.QuestionApp.dto.UserDto;
 import com.project.QuestionApp.entity.User;
+import com.project.QuestionApp.mapper.EditInfoMapper;
 import com.project.QuestionApp.mapper.UserMapper;
 import com.project.QuestionApp.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:8080")
@@ -21,17 +23,33 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private EditInfoMapper editInfoMapper;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @PostMapping("/user/edit_info/{id}")
     public UserDto editInfo(@RequestBody EditInfoDto editInfoDto, @PathVariable("id") Long userId) {
-        // TODO
-        return new UserDto();
+        User user = userService.findById(userId);
+        if (user != null) {
+            userService.editUserInfo(user, editInfoMapper.toUser(editInfoDto));
+            return userMapper.toUserDto(user);
+        } else {
+            return null;
+        }
     }
 
     @PostMapping("/user/change_pas/{id}")
     public UserDto changePassword(@RequestBody ChangePasswordDto changePasswordDto, @PathVariable("id") Long userId) {
-        // TODO
-        return new UserDto();
+        User user = userService.findById(userId);
+
+        if (user != null && bCryptPasswordEncoder.matches(changePasswordDto.getPassword(), user.getPassword()) &&
+                changePasswordDto.getNewPassword().equals(changePasswordDto.getConfNewPassword())) {
+            userService.changeUserPassword(user, changePasswordDto.getNewPassword());
+
+            return userMapper.toUserDto(user);
+        } else {
+            return null;
+        }
     }
 
     @GetMapping("/user/{id}")
