@@ -7,10 +7,12 @@ import com.project.QuestionApp.dto.UserDto;
 import com.project.QuestionApp.entity.User;
 import com.project.QuestionApp.mapper.EditInfoMapper;
 import com.project.QuestionApp.mapper.UserMapper;
+import com.project.QuestionApp.service.DefaultEmailService;
 import com.project.QuestionApp.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +27,10 @@ public class UserController {
     private UserMapper userMapper;
     @Autowired
     private EditInfoMapper editInfoMapper;
+    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private DefaultEmailService defaultEmailService;
 
     @PostMapping("/user/edit_info/{id}")
     public UserDto editInfo(@RequestBody EditInfoDto editInfoDto, @PathVariable("id") Long userId) {
@@ -41,11 +46,14 @@ public class UserController {
     @PostMapping("/user/change_pas/{id}")
     public UserDto changePassword(@RequestBody ChangePasswordDto changePasswordDto, @PathVariable("id") Long userId) {
         User user = userService.findById(userId);
-
         if (user != null && bCryptPasswordEncoder.matches(changePasswordDto.getPassword(), user.getPassword()) &&
                 changePasswordDto.getNewPassword().equals(changePasswordDto.getConfNewPassword())) {
+            try {
+                defaultEmailService.sendSimpleEmail("vagugpf@mailto.plus", "change password", "you password was successfully changed for " + changePasswordDto.getNewPassword()); // заменить на email юзера
+            } catch (MailException mailException) {
+                log.error("Error while sending out email..{}", mailException.getStackTrace());
+            }
             userService.changeUserPassword(user, changePasswordDto.getNewPassword());
-
             return userMapper.toUserDto(user);
         } else {
             return null;
@@ -66,7 +74,6 @@ public class UserController {
     @GetMapping("/user")
     public Long getUser() {
         User user = userService.getUserByLogin();
-
         return user.getId();
     }
 }

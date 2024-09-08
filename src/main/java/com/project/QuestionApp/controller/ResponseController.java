@@ -32,15 +32,4 @@ public class ResponseController {
     public ResponseDto getAllResponse(@PathVariable("id") Long responseId) {
         return responseMapper.toResponseDto(responseService.findResponse(responseId));
     }
-
-    @PutMapping("/questionnaires/update/{id}")
-    public ResponseDto updateField(@RequestBody ResponseDto responseDto, @PathVariable("id") Long responseId) {
-        // TODO
-        return null;
-    }
-
-    @DeleteMapping("/questionnaires/delete/{id}")
-    public void deleteResponse(@PathVariable("id") Long responseId) {
-        // TODO
-    }
 }
